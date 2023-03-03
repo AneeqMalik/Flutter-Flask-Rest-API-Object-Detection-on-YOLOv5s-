@@ -33,6 +33,7 @@ class ObjectDetectionScreen extends StatefulWidget {
 class _ObjectDetectionScreenState extends State<ObjectDetectionScreen> {
   late List<BoundingBox> _boundingBoxes = [];
   File? _image;
+  bool _loading = false;
   final picker = ImagePicker();
 
   Future<List<BoundingBox>> detectObjects(File image) async {
@@ -60,6 +61,10 @@ class _ObjectDetectionScreenState extends State<ObjectDetectionScreen> {
   }
 
   Future<void> getImage(ImageSource source) async {
+    setState(() {
+      _loading = true;
+    });
+
     final pickedFile =
         await picker.pickImage(source: source, maxWidth: 340, maxHeight: 340);
     if (pickedFile != null) {
@@ -69,6 +74,11 @@ class _ObjectDetectionScreenState extends State<ObjectDetectionScreen> {
       final bboxes = await detectObjects(_image!);
       setState(() {
         _boundingBoxes = bboxes;
+        _loading = false;
+      });
+    } else {
+      setState(() {
+        _loading = false;
       });
     }
   }
@@ -154,6 +164,12 @@ class _ObjectDetectionScreenState extends State<ObjectDetectionScreen> {
                   onPressed: () => getImage(ImageSource.gallery),
                   child: const Text("Choose from Gallery"),
                 ),
+                const SizedBox(height: 10),
+                _loading
+                    ? const CircularProgressIndicator(
+                        color: Colors.blue,
+                      )
+                    : const SizedBox(),
               ],
             ),
           ),
